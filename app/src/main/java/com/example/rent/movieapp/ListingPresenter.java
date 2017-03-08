@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 
 import nucleus.presenter.Presenter;
 
@@ -21,9 +22,9 @@ public class ListingPresenter extends Presenter<ListingActivity>{
                 try {
                     String result = getData(title);
                     SearchResult searchResult = new Gson().fromJson(result, SearchResult.class);
-                    getView().setDataOnUiThread(searchResult);
+                    getView().setDataOnUiThread(searchResult, false);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    getView().setDataOnUiThread(null, true);
                 }
             }
         }.start();
