@@ -2,7 +2,7 @@ package com.example.rent.movieapp;
 
 import java.util.Observable;
 
-import retrofit2.http.Field;
+import retrofit2.http.Query;
 import retrofit2.http.GET;
 
 /**
@@ -13,5 +13,5 @@ import retrofit2.http.GET;
 public interface SearchService {
 
     @GET("/")
-    io.reactivex.Observable<SearchResult> search(@Field("s") String title);
+    io.reactivex.Observable<SearchResult> search(@Query("s") String title, @Query("y") String year, @Query("type") String type);
 }
