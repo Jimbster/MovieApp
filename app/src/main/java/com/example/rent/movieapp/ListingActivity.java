@@ -14,8 +14,13 @@ import com.annimon.stream.Stream;
 
 import java.util.function.Consumer;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusAppCompatActivity;
+
+import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.schedulers.Schedulers.io;
 
 @RequiresPresenter(ListingPresenter.class)
 public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> {
@@ -38,7 +43,19 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         recyclerView.setAdapter(adapter);
         viewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
 
-        getPresenter().getDataAsync(title);
+        getPresenter().getDataAsync(title)
+                .subscribeOn(io())
+                .observeOn(mainThread())
+                .subscribe(this::success, this::error);
+    }
+
+    private void error(Throwable throwable) {
+        viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
+    }
+
+    private void success(SearchResult searchResult) {
+        viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
+        adapter.setItems(searchResult.getItems());
     }
 
     public static Intent createIntent(Context context, String title) {
@@ -48,15 +65,5 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     }
 
-    public void setDataOnUiThread(SearchResult result, boolean isProblemWithInternetConnection) {
 
-        runOnUiThread(() -> {
-            if (isProblemWithInternetConnection) {
-                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
-            } else {
-                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
-                adapter.setItems(result.getItems());
-            }
-        });
-    }
 }
